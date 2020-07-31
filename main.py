@@ -33,13 +33,7 @@ def format_blog(url):
     return parser.body
     
 if __name__ == '__main__':
-    reddit = praw.Reddit(
-        user_agent = 'wgposterbot',
-        client_id = "O0OjERMu2ZS6VA",
-        client_secret = os.environ['REDDIT_CLIENT_SECRET'],
-        username = 'wgposterbot',
-        password = os.environ['REDDIT_PASSWORD']
-    )
+    reddit = praw.Reddit('wgbot', user_agent = 'wgposterbot')
 
     subreddit = reddit.subreddit('WorldofWarships')
     for submission in subreddit.stream.submissions():
