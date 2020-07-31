@@ -1,4 +1,4 @@
-import praw, os, requests, re, html.parser
+import praw, os, requests, re, html.parser, time
 
 class BlogParser(html.parser.HTMLParser):
     def __init__(self):
@@ -38,5 +38,16 @@ if __name__ == '__main__':
     subreddit = reddit.subreddit('WorldofWarships')
     for submission in subreddit.stream.submissions():
         if submission.author.name == 'DevBlogWoWs':
-            blog_url = re.search('(https\:\/\/blog.worldofwarships.com\/blog\/[\d]+)', submission.selftext)[0]
-            submission.reply(format_blog(blog_url))
+            try:
+                blog_url = re.search('(https\:\/\/blog.worldofwarships.com\/blog\/[\d]+)', submission.selftext)[0]
+                submission.reply(format_blog(blog_url))
+            except praw.exceptions.RedditAPIException as e:
+                for ex in e.items:
+                    if e.error_type == 'RATELIMIT':
+                        wait = re.search('try again in (\d+) (minutes|seconds)', ex.message)
+                        if wait[2] == 'seconds':
+                            time.sleep(int(wait[1]) + 10)
+                        else:
+                            time.sleep(int(wait[1]) * 60 + 10)
+                        submission.reply(format_blog(blog_url))
+                        
